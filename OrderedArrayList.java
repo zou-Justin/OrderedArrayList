@@ -3,6 +3,9 @@ public class OrderedArrayList<T extends Comparable<T>> extends NoNullArrayList<T
   public OrderedArrayList(){
     super();
   }
+  public OrderedArrayList(int startingCapacity){
+    super(startingCapacity);
+  }
   public boolean add(T element){
     for (int i = 0; i < this.size();i++){
       if (this.get(i).compareTo(element) <= 0){
@@ -21,7 +24,6 @@ public class OrderedArrayList<T extends Comparable<T>> extends NoNullArrayList<T
   public T set(int index, T element){
     add(element);
     return super.remove(index);
-
   }
 
 
