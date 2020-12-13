@@ -1,9 +1,9 @@
 import java.util.IllegalArgumentException;
 public class NoNullArrayList<T> extends ArrayList<T>{
 
-  public boolean add(T element){
+  public boolean add(String element){
     if (element == null){
-      throw IllegalArgumentException("bad");
+      throw new IllegalArgumentException("bad");
     }
     Super.add(element);
   }
