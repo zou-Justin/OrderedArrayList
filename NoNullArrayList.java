@@ -7,5 +7,11 @@ public class NoNullArrayList<T> extends ArrayList<T>{
     }
     Super.add(element);
   }
+  public void add(int index,T element){
+    if (element == null){
+      throw new IllegalArgumentException("bad");
+    }
+    Super.add(index,element);
+  }
 
 }
