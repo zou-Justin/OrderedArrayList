@@ -9,16 +9,10 @@ public class OrderedArrayList<T extends Comparable<T>> extends NoNullArrayList<T
     super(startingCapacity);
   }
   public boolean add(T element){
-    if (element == null){
-      throw new IllegalArgumentException("no nulls");
-    }
     super.add(index(element),element);
     return true;
 }
   public void add(int index,T element){
-    if (element == null){
-      throw new IllegalArgumentException("no nulls");
-    }
   super.add(index(element),element);
   }
   public T set(int index, T element){
@@ -27,7 +21,7 @@ public class OrderedArrayList<T extends Comparable<T>> extends NoNullArrayList<T
     }
     int i = index;
     super.remove(index);
-    add(element);
+    super.add(element);
     return this.get(i);
   }
 private int index(T element){
