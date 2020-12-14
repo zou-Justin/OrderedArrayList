@@ -1,3 +1,5 @@
+import java.lang.IllegalArgumentException;
+import java.util.ArrayList;
 public class OrderedArrayList<T extends Comparable<T>> extends NoNullArrayList<T>{
 
   public OrderedArrayList(){
@@ -7,24 +9,39 @@ public class OrderedArrayList<T extends Comparable<T>> extends NoNullArrayList<T
     super(startingCapacity);
   }
   public boolean add(T element){
-    for (int i = 0; i < this.size();i++){
-      if (this.get(i).compareTo(element) <= 0){
-        this.add(i,element);
-      }
+    if (element == null){
+      throw new IllegalArgumentException("no nulls");
     }
-    return super.add(element);
-  }
-  public void add(int index, T element){
-    for (int i = 0; i < this.size();i++){
-      if (this.get(i).compareTo(element) <= 0){
-        this.add(i,element);
-      }
+    super.add(index(element),element);
+    return true;
+}
+  public void add(int index,T element){
+    if (element == null){
+      throw new IllegalArgumentException("no nulls");
     }
+  super.add(index(element),element);
   }
   public T set(int index, T element){
+    if (element == null){
+      throw new IllegalArgumentException("no nulls");
+    }
+    int i = index;
+    super.remove(index);
     add(element);
-    return super.remove(index);
+    return this.get(i);
   }
-
-
+private int index(T element){
+  if(element == null){
+    throw new IllegalArgumentException("no nulls");
+  }
+    if (super.size() == 0){
+      return 0;
+    }
+  for (int i = 0; i < super.size(); i++){
+    if(element.compareTo(super.get(i)) < 0){
+      return i;
+    }
+  }
+  return super.size();
+}
 }
