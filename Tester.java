@@ -1,5 +1,5 @@
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 
 public class Tester {
 
@@ -7,9 +7,10 @@ public class Tester {
 		boolean failure = false;
 
 		failure = constructorTester() || failure;
-		failure = addTester(1000) || failure;
-		failure = addAtIndexTester(1000) || failure;
-		failure = setTester(1000) || failure;
+		failure = nullTester() || failure;
+		failure = addTester(20) || failure;
+		failure = addAtIndexTester(20) || failure;
+		failure = failure || setTester(1000);
 
 		TesterMethods.overall(failure);
 	}
@@ -19,7 +20,7 @@ public class Tester {
 		boolean fail = false;
 
 		try {
-			NoNullArrayList<Object> def = new NoNullArrayList<Object>();
+			OrderedArrayList<Integer> def = new OrderedArrayList<Integer>();
 			//TesterMethods.passMessage("default tester");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -29,7 +30,7 @@ public class Tester {
 
 		try {
 			int randSize = TesterMethods.randInt(8);
-			NoNullArrayList<Object> rand = new NoNullArrayList<Object>(randSize);
+			OrderedArrayList<Integer> rand = new OrderedArrayList<Integer>(randSize);
 			//TesterMethods.passMessage("randSize tester");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -37,58 +38,100 @@ public class Tester {
 			TesterMethods.errorMessage("randSize tester");
 		}
 
+		try {
+			NoNullArrayList<Integer> def = new OrderedArrayList<Integer>();
+			//TesterMethods.passMessage("default tester");
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail = true;
+			TesterMethods.errorMessage("Improper class extension.");
+		}
+
 		TesterMethods.methodMessage("constructorTester", fail);
+		return fail;
+	}
+
+	public static boolean nullTester() {
+		TesterMethods.tester("nullTester");
+		boolean fail = false;
+
+		OrderedArrayList<Integer> test = new OrderedArrayList<Integer>();
+
+		for (int n = 0; n < 10; n++) {
+			test.add(n);
+		}
+
+		try {
+			test.add(null);
+			fail = true;
+			TesterMethods.errorMessage("add(value) added a null");
+		} catch (IllegalArgumentException e) {
+			//TesterMethods.passMessage("add(value) didn't add a null");
+		}
+
+		try {
+			for (int i = 0; i < 100; i++) {
+				test.add(TesterMethods.randInt(10), null);
+				fail = true;
+				TesterMethods.errorMessage(i, "to not be here", "add(index, value) added a null");
+			}
+		} catch (IllegalArgumentException e) {
+			//TesterMethods.passMessage("add(index, value) didn't add a null");
+		}
+
+		try {
+			for (int i = 0; i < 100; i++) {
+				test.set(TesterMethods.randInt(10), null);
+				fail = true;
+				TesterMethods.errorMessage(i, "to not be here", "set(index, value) added a null");
+			}
+		} catch (IllegalArgumentException e) {
+			//TesterMethods.passMessage("set(index, value) didn't add a null");
+		}
+
+		TesterMethods.methodMessage("nullTester", fail);
 		return fail;
 	}
 
 	public static boolean addTester(int tests) {
 		TesterMethods.tester("addTester");
 		boolean fail = false;
-		NoNullArrayList<Integer> noNulls = new NoNullArrayList<Integer>();
+		ArrayList<Integer> expected = new ArrayList<Integer>();
+		OrderedArrayList<Integer> subject = new OrderedArrayList<Integer>();
 
-		int nulls = 0;
-		ArrayList<Integer> all = new ArrayList<Integer>();
 
 		for (int test = 0; test < tests; test++) {
+			Integer value = TesterMethods.randInt((int)-1e6, (int)1e6);
 			if (TesterMethods.randInt(10) == 0) {
-				nulls++;
-				all.add(null);
+				value = null;
 				try {
-					noNulls.add(null);
+					fail = subject.add(value);
 					fail = true;
-					TesterMethods.errorMessage("Should not be able to insert null.");
+					TesterMethods.errorMessage(test, "not to be here", "added null");
 				} catch (IllegalArgumentException e) {
 					//TesterMethods.passMessage(test);
 				}
 			} else {
-				Integer randval = TesterMethods.randInt(-10, 10);
-				all.add(randval);
-				fail = fail || !noNulls.add(randval);
-				//TesterMethods.passMessage(test);
+				expected.add(value);
+				boolean output = subject.add(value);
+				if (output) {
+					//TesterMethods.passMessage(test);
+				} else {
+					fail = true;
+					TesterMethods.errorMessage(test, "true", Boolean.toString(output));
+				}
 			}
+			//System.out.println(subject.toString());
 		}
 
-		int nullOffset = 0;
+		Collections.sort(expected);
 
-		for (int index = 0; index < all.size(); index++) {
-			if (all.get(index) == null) {
-				nullOffset += 1;
-			} else if (all.get(index) == noNulls.get(index - nullOffset)) {
-				//TesterMethods.passMessage(index);
-			} else {
-				fail = true;
-				TesterMethods.errorMessage(Integer.toString(index), Integer.toString(all.get(index)), Integer.toString(noNulls.get(index - nullOffset)));
-			}
-		}
-
-		if ((tests - nulls) == noNulls.size()) {
-			//TesterMethods.passMessage("Amount of elements");
+		if (expected.equals(subject)) {
+			//TesterMethods.passMessage("sorting algo");
 		} else {
-			fail  = true;
-			TesterMethods.errorMessage("Amount of elements does not line up",  Integer.toString(tests - nulls), Integer.toString(noNulls.size()));
+			fail = true;
+			TesterMethods.errorMessage("sorting algo", expected.toString(), subject.toString());
 		}
-
-
 
 		TesterMethods.methodMessage("addTester", fail);
 		return fail;
@@ -97,51 +140,37 @@ public class Tester {
 	public static boolean addAtIndexTester(int tests) {
 		TesterMethods.tester("addAtIndexTester");
 		boolean fail = false;
-		NoNullArrayList<Integer> noNulls = new NoNullArrayList<Integer>();
+		ArrayList<Integer> expected = new ArrayList<Integer>();
+		OrderedArrayList<Integer> subject = new OrderedArrayList<Integer>();
 
-		int nulls = 0;
-		ArrayList<Integer> all = new ArrayList<Integer>();
 
 		for (int test = 0; test < tests; test++) {
+			Integer value = TesterMethods.randInt((int)-1e6, (int)1e6);
+			int index = TesterMethods.randInt(subject.size());
 			if (TesterMethods.randInt(10) == 0) {
-				nulls++;
-				all.add(0, null);
+				value = null;
 				try {
-					noNulls.add(0, null);
+					subject.add(index, value);
 					fail = true;
-					TesterMethods.errorMessage("Should not be able to insert null.");
+					TesterMethods.errorMessage(test, "not to be here", "added null");
 				} catch (IllegalArgumentException e) {
 					//TesterMethods.passMessage(test);
 				}
 			} else {
-				Integer randval = TesterMethods.randInt(-10, 10);
-				all.add(0, randval);
-				noNulls.add(0,randval);
-				//TesterMethods.passMessage(test);
+				expected.add(index, value);
+				subject.add(index, value);
 			}
+			//System.out.println(subject.toString());
 		}
 
-		int nullOffset = 0;
+		Collections.sort(expected);
 
-		for (int index = 0; index < all.size(); index++) {
-			if (all.get(index) == null) {
-				nullOffset += 1;
-			} else if (all.get(index) == noNulls.get(index - nullOffset)) {
-				//TesterMethods.passMessage(index);
-			} else {
-				fail = true;
-				TesterMethods.errorMessage(Integer.toString(index), Integer.toString(all.get(index)), Integer.toString(noNulls.get(index - nullOffset)));
-			}
-		}
-
-		if ((tests - nulls) == noNulls.size()) {
-			//TesterMethods.passMessage("Amount of elements");
+		if (expected.equals(subject)) {
+			//TesterMethods.passMessage("sorting algo");
 		} else {
-			fail  = true;
-			TesterMethods.errorMessage("Amount of elements does not line up",  Integer.toString(tests - nulls), Integer.toString(noNulls.size()));
+			fail = true;
+			TesterMethods.errorMessage("sorting algo", expected.toString(), subject.toString());
 		}
-
-
 
 		TesterMethods.methodMessage("addAtIndexTester", fail);
 		return fail;
@@ -150,53 +179,54 @@ public class Tester {
 	public static boolean setTester(int tests) {
 		TesterMethods.tester("setTester");
 		boolean fail = false;
-
-		NoNullArrayList<Integer> noNulls = new NoNullArrayList<Integer>();
-		ArrayList<Integer> all = new ArrayList<Integer>();
-
-		for (int val = 0; val < tests; val++) {
-			int n = TesterMethods.randInt(-val, val);
-			noNulls.add(n);
-			all.add(n);
-		}
-
-		ArrayList<Integer> original = new ArrayList<>(all);
+		ArrayList<Integer> expected = new ArrayList<Integer>();
+		OrderedArrayList<Integer> subject = new OrderedArrayList<Integer>();
 
 		for (int test = 0; test < tests; test++) {
+			Integer value = TesterMethods.randInt((int)-1e6, (int)1e6);
+			expected.add(value);
+			subject.add(value);
+		}
+
+		Collections.sort(expected);
+
+		if (!expected.equals(subject)) {
+			throw new IllegalStateException("Expected and subject unequal before mutations.");
+		}
+
+		for (int test = 0; test < tests; test++) {
+			Integer value = TesterMethods.randInt((int)-1e6, (int)1e6);
+			int index = TesterMethods.randInt(subject.size());
 			if (TesterMethods.randInt(10) == 0) {
+				value = null;
 				try {
-					all.set(test, null);
-					noNulls.set(test, null);
-					TesterMethods.errorMessage("Should not be able to set null");
+					subject.set(index, value);
+					fail = true;
+					TesterMethods.errorMessage(test, "not to be here", "set null");
 				} catch (IllegalArgumentException e) {
 					//TesterMethods.passMessage(test);
 				}
 			} else {
-				int randval = TesterMethods.randInt(-1000000, 1000000);
-				int expectedReturn = all.set(test, randval);
-				int returned = noNulls.set(test, randval);
-				if (expectedReturn == returned) {
+				Collections.sort(expected);
+				int expectedReturn = expected.set(index, value);
+				int returned = subject.set(index, value);
+				if (returned == expectedReturn) {
 					//TesterMethods.passMessage(test);
 				} else {
+					fail = true;
 					TesterMethods.errorMessage(test, Integer.toString(expectedReturn), Integer.toString(returned));
 				}
-				//TesterMethods.passMessage(test);
 			}
+			//System.out.println(subject.toString());
 		}
 
-		for (int test = 0; test < tests; test++) {
-			Integer noNullsVal = noNulls.get(test);
-			Integer expectedVal = all.get(test);
-			if (expectedVal == null) {
-				expectedVal = original.get(test);
-			}
+		Collections.sort(expected);
 
-			if (noNullsVal.equals(expectedVal)) {
-				//TesterMethods.passMessage(test);
-			} else {
-				fail = true;
-				TesterMethods.errorMessage(test, Integer.toString(expectedVal), Integer.toString(noNullsVal));
-			}
+		if (expected.equals(subject)) {
+			//TesterMethods.passMessage("sorting algo");
+		} else {
+			fail = true;
+			TesterMethods.errorMessage("sorting algo", expected.toString(), subject.toString());
 		}
 
 		TesterMethods.methodMessage("setTester", fail);
