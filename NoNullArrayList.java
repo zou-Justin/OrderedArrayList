@@ -26,6 +26,4 @@ public class NoNullArrayList<T> extends ArrayList<T>{
     }
     return super.set(index,element);
   }
-
-
 }
