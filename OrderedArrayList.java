@@ -13,16 +13,16 @@ public class OrderedArrayList<T extends Comparable<T>> extends NoNullArrayList<T
     return true;
 }
   public void add(int index,T element){
-  super.add(index(element),element);
+    super.add(index(element),element);
   }
   public T set(int index, T element){
     if (element == null){
       throw new IllegalArgumentException("no nulls");
     }
-    int i = index;
+    T b = super.get(index);
     super.remove(index);
-    super.add(element);
-    return this.get(i);
+    add(element);
+    return b;
   }
 private int index(T element){
   if(element == null){
@@ -31,11 +31,12 @@ private int index(T element){
     if (super.size() == 0){
       return 0;
     }
+
   for (int i = 0; i < super.size(); i++){
-    if(element.compareTo(super.get(i)) < 0){
-      return i;
+    if (element.compareTo(super.get(i)) <= 0){
+        return i;
     }
   }
   return super.size();
-}
+  }
 }
